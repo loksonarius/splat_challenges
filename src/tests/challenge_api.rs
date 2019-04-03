@@ -99,7 +99,7 @@ fn make_response_assertions(mut res: LocalResponse, status: Status, body_substri
             Status::Created,
             vec![]
             :: "challenge containing emojii is ok")]
-fn challenge_insertion(body: &str, expected_status: Status, expected_substrings: Vec<&str>) {
+fn insertion(body: &str, expected_status: Status, expected_substrings: Vec<&str>) {
     run_test!(|client, conn| {
         let mut res = client.post("/challenges")
             .header(ContentType::JSON)
@@ -116,16 +116,16 @@ fn challenge_insertion(body: &str, expected_status: Status, expected_substrings:
 #[test_case("/challenges",
             Status::Ok,
             vec!["Sample test", "Another sample test"]
-            :: "challenge index is ok")]
+            :: "index is ok")]
 #[test_case("/challenges/-1",
             Status::NotFound,
             vec![]
-            :: "challenge at invalid numeric index not found")]
+            :: "invalid numeric index returns not found")]
 #[test_case("/challenges/lolthisdonotexist",
             Status::NotFound,
             vec![]
-            :: "challenge at invalid non-numeric index not found")]
-fn challenge_reading(endpoint: &str, expected_status: Status, expected_substrings: Vec<&str>) {
+            :: "invalid non-numeric index returns not found")]
+fn reading(endpoint: &str, expected_status: Status, expected_substrings: Vec<&str>) {
     run_test!(|client, conn| {
         let mut res = client.get(endpoint)
             .header(ContentType::JSON)
@@ -138,7 +138,7 @@ fn challenge_reading(endpoint: &str, expected_status: Status, expected_substring
 }
 
 // Not using generated test-case functions as these each require more involved logic
-mod challenge_deletion {
+mod deletion {
     #[allow(unused_imports)]
     use super::*;
 

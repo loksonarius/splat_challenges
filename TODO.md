@@ -1,7 +1,5 @@
 # To Do's
 
-- Refactor tests with own directory
-  - Move challenges' tests into new file in new tests directory
 - User Results instead of empty lists for Challenge repo
   - Implement custom Challenge repo errors (NotFound, DB, Serial, etc.)
   - Update handlers to return custom error messages

@@ -1,0 +1,5 @@
+CREATE TABLE challenges (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title VARCHAR NOT NULL,
+  description VARCHAR NOT NULL
+)

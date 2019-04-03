@@ -1,0 +1,5 @@
+[global]
+template_dir = "static"
+
+[global.databases.splat_challenges]
+url = "db/splat_challenges.db"

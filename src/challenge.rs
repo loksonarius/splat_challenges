@@ -21,33 +21,34 @@ pub struct NewChallenge {
 }
 
 impl Challenge {
-    pub fn list(conn: &SqliteConnection) -> Vec<Challenge> {
-        use self::schema::challenges::dsl::*;
+    pub fn list(conn: &SqliteConnection) -> Result<Vec<Challenge>, ChallengeError> {
+        use crate::schema::challenges::dsl::*;
         let results = challenges
                         .order(id)
                         .load::<Challenge>(conn);
 
         if let Ok(challenge_list) = results {
-            return challenge_list;
+            return Ok(challenge_list);
         }
 
-        vec![]
+        Err(ChallengeError::NotFoundError)
     }
 
-    pub fn get(target_id: i32, conn: &SqliteConnection) -> Option<Challenge> {
-        use self::schema::challenges::dsl::*;
+    pub fn get(target_id: i32, conn: &SqliteConnection) -> Result<Challenge, ChallengeError> {
+        use crate::schema::challenges::dsl::*;
         let result = challenges
                             .find(target_id)
                             .first::<Challenge>(conn);
+
         if let Ok(challenge) = result {
-            return Some(challenge)
+            return Ok(challenge)
         }
 
-        None
+        Err(ChallengeError::NotFoundError)
     }
 
-    pub fn add(input: Vec<NewChallenge>, conn: &SqliteConnection) -> Vec<Challenge> {
-        use self::schema::challenges::dsl::*;
+    pub fn add(input: Vec<NewChallenge>, conn: &SqliteConnection) -> Result<Vec<Challenge>, ChallengeError> {
+        use crate::schema::challenges::dsl::*;
         let results = conn.transaction::<_, diesel::result::Error, _>(|| {
             let inserted_count = diesel::insert_into(challenges)
                 .values(&input)
@@ -63,14 +64,14 @@ impl Challenge {
         });
 
         if let Ok(challenge_list) = results {
-            return challenge_list;
+            return Ok(challenge_list);
         }
 
-        vec![]
+        Err(ChallengeError::DatabaseError)
     }
 
     pub fn remove(target_id: i32, conn: &SqliteConnection) -> Result<Challenge, ChallengeError> {
-        use self::schema::challenges::dsl::*;
+        use crate::schema::challenges::dsl::*;
         let result = conn.transaction::<_, diesel::result::Error, _>(|| {
             let target = challenges
                 .find(target_id)
@@ -90,8 +91,8 @@ impl Challenge {
     }
 
     #[cfg(test)]
-    pub fn remove_all(conn: &SqliteConnection) -> Vec<Challenge> {
-        use self::schema::challenges::dsl::*;
+    pub fn remove_all(conn: &SqliteConnection) -> Result<Vec<Challenge>, ChallengeError> {
+        use crate::schema::challenges::dsl::*;
         let results = conn.transaction::<_, diesel::result::Error, _>(|| {
             let removed_challenges = challenges.load::<Challenge>(conn)?;
 
@@ -102,9 +103,9 @@ impl Challenge {
         });
 
         if let Ok(challenge_list) = results {
-            return challenge_list;
+            return Ok(challenge_list);
         }
 
-        vec![]
+        Err(ChallengeError::DatabaseError)
     }
 }

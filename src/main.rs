@@ -47,39 +47,49 @@ fn index() -> JsonValue {
 }
 
 #[get("/", format = "json")]
-fn list(conn: DbConn) -> Json<Vec<Challenge>> {
-    Json(Challenge::list(&conn))
+fn list(conn: DbConn) -> Result<Json<Vec<Challenge>>, status::Custom<String>> {
+    match Challenge::list(&conn) {
+        Ok(list) => Ok(Json(list)),
+        Err(_) =>
+            Err(status::Custom(
+                    Status::InternalServerError,
+                    format!("Encountered internal error trying to list challenges"))),
+
+    }
 }
 
 #[get("/<id>", format = "json")]
 fn get(id: i32, conn: DbConn) -> Result<Json<Challenge>, status::NotFound<String>>  {
     match Challenge::get(id, &conn) {
-        Some(challenge) => Ok(Json(challenge)),
+        Ok(challenge) => Ok(Json(challenge)),
         _ => Err(status::NotFound(format!("Unable to find challenge with ID ({})", id))),
     }
 }
 
 #[post("/", format = "json", data = "<input>")]
 fn new(input: Json<Vec<NewChallenge>>, conn: DbConn) -> Result<status::Created<JsonValue>, status::Custom<String>> {
-    let added_ids: Vec<i32> = Challenge::add(input.into_inner(), &conn)
-        .into_iter()
-        .map( |challenge| challenge.id )
-        .collect();
-    match added_ids.len() {
-        0 => Err(status::Custom(Status::UnprocessableEntity,
-                                "Unable to store given challenges".to_string())),
-        _ => Ok(status::Created(
-                added_ids
-                    .clone()
-                    .into_iter()
-                    .map( |id| format!("http://localhost:8000/challenges/{}", id) )
-                    .collect(),
-                Some(json!({
-                    "error": false,
-                    "details": "Stored given challenges successfully",
-                    "modified_ids": added_ids}))),
-            ),
+    let result = Challenge::add(input.into_inner(), &conn);
+    let id_url_list = |challenges: &Vec<Challenge>| -> Vec<String> {
+        challenges
+            .into_iter()
+            .map( |challenge| format!("http://localhost:8000/challenges/{}", challenge.id) )
+            .collect()
+    };
+
+    match result {
+        Ok(challenges) => {
+            let ids = id_url_list(&challenges);
+            Ok(status::Created(
+                    ids.join(","),
+                    Some(json!({
+                            "error": false,
+                            "details": "Stored given challenges successfully",
+                            "modified_ids": ids}))))
+        },
+        Err(_) => Err(status::Custom(Status::InternalServerError,
+                           "Encountered internal error trying to store challenges".to_string())),
     }
+
 }
 
 #[delete("/<id>", format = "json")]
@@ -92,11 +102,11 @@ fn delete(id: i32, conn: DbConn) -> Result<status::Accepted<JsonValue>, status::
             "modified_ids": [
                 challenge.id
             ]})))),
-        Err(challenge::ChallengeError::NotFoundError) =>
+        Err(NotFoundError) =>
             Err(status::Custom(
                     Status::NotFound,
-                    format!("Unable to delete challenge with id ({})", id))),
-        Err(challenge::ChallengeError::DatabaseError) =>
+                    format!("No such challenge with id ({})", id))),
+        Err(_) =>
             Err(status::Custom(
                     Status::InternalServerError,
                     format!("Encountered internal error trying to delete id ({})", id))),

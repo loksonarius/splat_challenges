@@ -30,7 +30,7 @@ macro_rules! run_test {
         let $conn = db.expect("failed to get database connection for testing");
 
         // Clear DB and re-seed with desired initial state
-        Challenge::remove_all(&$conn);
+        Challenge::remove_all(&$conn).unwrap();
         Challenge::add(
             vec![
                 NewChallenge {
@@ -43,7 +43,7 @@ macro_rules! run_test {
                 },
             ],
             &$conn
-        );
+        ).unwrap();
         $block
     })
 }
@@ -71,9 +71,9 @@ fn make_response_assertions(mut res: LocalResponse, status: Status, body_substri
             vec![]
             :: "missing fields yields bad request")]
 #[test_case("[]",
-            Status::UnprocessableEntity,
+            Status::Created,
             vec![]
-            :: "empty batch is unprocessable")]
+            :: "empty batch is ok")]
 #[test_case(r#"[{
             "title": "Basic baby!",
             "description": "Desc goes here"}]"#,
@@ -158,7 +158,7 @@ mod deletion {
     #[test]
     fn nonexistent_index_is_not_found() {
         run_test!(|client, conn| {
-            Challenge::remove_all(&conn);
+            Challenge::remove_all(&conn).unwrap();
             let res = client.delete("/challenges/1")
                 .header(ContentType::JSON)
                 .dispatch();
@@ -172,7 +172,7 @@ mod deletion {
     #[test]
     fn valid_index_is_acceptable() {
         run_test!(|client, conn| {
-            let preexisting_challenges = Challenge::list(&conn);
+            let preexisting_challenges = Challenge::list(&conn).unwrap();
             for challenge in preexisting_challenges {
                 let res = client.delete(format!("/challenges/{}", challenge.id))
                     .header(ContentType::JSON)

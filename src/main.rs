@@ -1,24 +1,36 @@
 #![feature(proc_macro_hygiene, decl_macro)]
 
-#[macro_use] extern crate rocket;
 #[macro_use] extern crate diesel;
-#[macro_use] extern crate serde_derive;
+#[macro_use] extern crate rocket;
 #[macro_use] extern crate rocket_contrib;
+#[macro_use] extern crate serde_derive;
 
-mod challenge;
-
-#[cfg(test)] mod tests;
-
+use diesel::SqliteConnection;
 use rocket::{
     Rocket,
-    response::status,
     http::Status,
+    response::status,
 };
-use diesel::SqliteConnection;
+use rocket_contrib::json::{
+    Json,
+    JsonValue,
+};
 
-use rocket_contrib::json::{Json, JsonValue};
+use challenge::{
+    Challenge,
+    NewChallenge,
+};
+use errors::ChallengeError::{
+    // DatabaseError,
+    NotFoundError,
+    // SerializationError,
+};
 
-use challenge::{Challenge, NewChallenge};
+mod challenge;
+mod errors;
+mod schema;
+
+#[cfg(test)] mod tests;
 
 #[database("splat_challenges")]
 pub struct DbConn(SqliteConnection);

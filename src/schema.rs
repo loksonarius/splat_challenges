@@ -1,6 +1,6 @@
 table! {
     challenges (id) {
-        id -> Nullable<Integer>,
+        id -> Integer,
         title -> Text,
         description -> Text,
     }

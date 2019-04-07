@@ -1,16 +1,10 @@
-use diesel::{self, prelude::*};
+use diesel::{
+    self,
+    prelude::*
+};
 
-mod schema {
-    table! {
-        challenges (id) {
-            id -> Integer,
-            title -> Text,
-            description -> Text,
-        }
-    }
-}
-
-use self::schema::challenges;
+use crate::schema::challenges;
+use crate::errors::ChallengeError;
 
 #[derive(Serialize, Deserialize, Queryable, Insertable, Debug)]
 pub struct Challenge {
@@ -24,11 +18,6 @@ pub struct Challenge {
 pub struct NewChallenge {
     pub title: String,
     pub description: String,
-}
-
-pub enum ChallengeError {
-    NotFoundError,
-    DatabaseError,
 }
 
 impl Challenge {

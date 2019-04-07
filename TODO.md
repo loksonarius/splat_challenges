@@ -1,6 +1,6 @@
 # To Do's
 
-- User Results instead of empty lists for Challenge repo
+- Use Results instead of empty lists for Challenge repo
   - Implement custom Challenge repo errors (NotFound, DB, Serial, etc.)
   - Update handlers to return custom error messages
 - Augment Challenge model

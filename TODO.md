@@ -1,8 +1,6 @@
 # To Do's
 
-- Use Results instead of empty lists for Challenge repo
-  - Implement custom Challenge repo errors (NotFound, DB, Serial, etc.)
-  - Update handlers to return custom error messages
+- Update handlers to return custom error messages
 - Augment Challenge model
   - Delineate weapon, map, mode, and category tags to attach to Challenges
   - Augment challenge listing with query params for tags

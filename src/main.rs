@@ -28,7 +28,7 @@ use errors::ChallengeError::{
 
 mod challenge;
 mod errors;
-mod schema;
+mod schemas;
 
 #[cfg(test)] mod tests;
 

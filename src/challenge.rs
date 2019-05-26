@@ -3,7 +3,7 @@ use diesel::{
     prelude::*
 };
 
-use crate::schema::challenges;
+use crate::schemas::challenges;
 use crate::errors::ChallengeError;
 
 #[derive(Serialize, Deserialize, Queryable, Insertable, Debug)]
@@ -22,7 +22,7 @@ pub struct NewChallenge {
 
 impl Challenge {
     pub fn list(conn: &SqliteConnection) -> Result<Vec<Challenge>, ChallengeError> {
-        use crate::schema::challenges::dsl::*;
+        use crate::schemas::challenges::dsl::*;
         let results = challenges
                         .order(id)
                         .load::<Challenge>(conn);
@@ -35,7 +35,7 @@ impl Challenge {
     }
 
     pub fn get(target_id: i32, conn: &SqliteConnection) -> Result<Challenge, ChallengeError> {
-        use crate::schema::challenges::dsl::*;
+        use crate::schemas::challenges::dsl::*;
         let result = challenges
                             .find(target_id)
                             .first::<Challenge>(conn);
@@ -48,7 +48,7 @@ impl Challenge {
     }
 
     pub fn add(input: Vec<NewChallenge>, conn: &SqliteConnection) -> Result<Vec<Challenge>, ChallengeError> {
-        use crate::schema::challenges::dsl::*;
+        use crate::schemas::challenges::dsl::*;
         let results = conn.transaction::<_, diesel::result::Error, _>(|| {
             let inserted_count = diesel::insert_into(challenges)
                 .values(&input)
@@ -71,7 +71,7 @@ impl Challenge {
     }
 
     pub fn remove(target_id: i32, conn: &SqliteConnection) -> Result<Challenge, ChallengeError> {
-        use crate::schema::challenges::dsl::*;
+        use crate::schemas::challenges::dsl::*;
         let result = conn.transaction::<_, diesel::result::Error, _>(|| {
             let target = challenges
                 .find(target_id)
@@ -92,7 +92,7 @@ impl Challenge {
 
     #[cfg(test)]
     pub fn remove_all(conn: &SqliteConnection) -> Result<Vec<Challenge>, ChallengeError> {
-        use crate::schema::challenges::dsl::*;
+        use crate::schemas::challenges::dsl::*;
         let results = conn.transaction::<_, diesel::result::Error, _>(|| {
             let removed_challenges = challenges.load::<Challenge>(conn)?;
 
